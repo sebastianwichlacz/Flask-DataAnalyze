@@ -30,7 +30,7 @@
                     <a class="nav-link active" aria-current="page" href="#">Home</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Link</a>
+                    <a class="nav-link"  href="{{ url_for('views.tracker') }}">Tracker</a>
                 </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
@@ -80,7 +80,6 @@
         <img src="{{ url_for('static',filename=plot) }}" alt="Covid-19 Cases plot">
         {% endif %}
     </div>
-
 
     <h2>Statistics</h2>
     {% block dataframe %}

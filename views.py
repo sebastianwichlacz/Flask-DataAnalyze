@@ -45,6 +45,8 @@ def save_plot_to_image(df_country, selected_countries):
 
     return 'images/covid_cases_plot.png'
 
+
+
 @views.route('/', methods=['GET', 'POST'])
 def index():
     db_file = "db/database.db"
@@ -69,3 +71,24 @@ def index():
         return render_template("index.html", countries=countries, plot=plot_path)
 
     return render_template("index.html", countries=countries)
+
+@views.route('/tracker', methods=['GET', 'POST'])
+def tracker():
+    db_file = "db/database.db"
+    table_name = "covid_data"
+
+    if request.method == 'POST':
+        search_value = request.form.get('search').strip()
+        df = read_data_from_db(db_file, table_name)
+        df.drop(["Lat", "Long"], axis=1, inplace=True)
+        df_country = df.groupby("Country/Region").sum()
+
+        # Check if the search_value is in the index of df_country
+        if search_value in df_country.index:
+            search_result = search_value
+        else:
+            search_result = "No matches found."
+
+        return render_template("tracker.html", search_result=search_result)
+
+    return render_template('tracker.html', search_result=None)

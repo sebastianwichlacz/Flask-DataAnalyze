@@ -1,28 +1,26 @@
-/* styles.css */
-body {
-    background-color: red;
-}
 
-/* Container for the button list */
 .scrollable-list {
     max-height: 300px; /* Set height limit for scrolling */
     overflow-y: auto;
-    width: 100%; /* Makes the list take most of the screen width */
+    width: 100%;
     display: flex;
     flex-direction: column;
 }
 
-/* Style for individual buttons */
 .country-btn {
-    width: 100%; /* Makes each button take the full width of the container */
-    text-align: center; /* Centers the text inside the button */
-    margin-bottom: 5px; /* Adds space between buttons */
-    border: 1px solid #007bff; /* Adds border to buttons */
-    background-color: white; /* Default background color */
+    width: 100%;
+    text-align: center;
+    margin-bottom: 5px;
+    border: 1px solid #007bff;
+    background-color: white; /
 }
 
-/* Style for selected buttons */
 .country-btn.selected {
-    background-color: #007bff; /* Darker shade when selected */
+    background-color: #007bff; /
     color: white;
+}
+
+.center{
+    display: flex;
+    justify-content: center;
 }
