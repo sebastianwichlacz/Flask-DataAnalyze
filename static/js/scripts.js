@@ -23,3 +23,44 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
+
+document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.getElementById('search');
+    const suggestionsDiv = document.getElementById('suggestions');
+
+    searchInput.addEventListener('input', function () {
+        const searchTerm = searchInput.value;
+
+        if (searchTerm.length === 0) {
+            suggestionsDiv.style.display = 'none';
+            return;
+        }
+
+        fetch(`/suggestions?term=${searchTerm}`)
+            .then(response => response.json())
+            .then(data => {
+                suggestionsDiv.innerHTML = '';
+                if (data.length > 0) {
+                    suggestionsDiv.style.display = 'block';
+                    data.forEach(suggestion => {
+                        const div = document.createElement('div');
+                        div.textContent = suggestion;
+                        div.classList.add('suggestion-item');
+                        div.addEventListener('click', function () {
+                            searchInput.value = suggestion;
+                            suggestionsDiv.style.display = 'none';
+                        });
+                        suggestionsDiv.appendChild(div);
+                    });
+                } else {
+                    suggestionsDiv.style.display = 'none';
+                }
+            });
+    });
+
+    document.addEventListener('click', function (event) {
+        if (!suggestionsDiv.contains(event.target) && event.target !== searchInput) {
+            suggestionsDiv.style.display = 'none';
+        }
+    });
+});

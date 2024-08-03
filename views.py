@@ -1,5 +1,5 @@
 import sqlite3
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, jsonify
 import matplotlib
 matplotlib.use('Agg')
 from matplotlib import pyplot as plt
@@ -92,3 +92,18 @@ def tracker():
         return render_template("tracker.html", search_result=search_result)
 
     return render_template('tracker.html', search_result=None)
+
+
+@views.route('/suggestions', methods=['GET'])
+def suggestions():
+    search_term = request.args.get('term', '').strip()
+    db_file = "db/database.db"
+    table_name = "covid_data"
+    df = read_data_from_db(db_file, table_name)
+    df.drop(["Lat", "Long"], axis=1, inplace=True)
+    countries = df['Country/Region'].unique()
+
+    # Filter countries based on search_term being a substring in the same sequence
+    matches = [country for country in countries if search_term.lower() in country.lower()]
+
+    return jsonify(matches)
