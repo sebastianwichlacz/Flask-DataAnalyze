@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
 document.addEventListener('DOMContentLoaded', function () {
     const searchInput = document.getElementById('search');
     const suggestionsDiv = document.getElementById('suggestions');
+    const form = document.querySelector('form');
 
     searchInput.addEventListener('input', function () {
         const searchTerm = searchInput.value;
@@ -49,6 +50,12 @@ document.addEventListener('DOMContentLoaded', function () {
                         div.addEventListener('click', function () {
                             searchInput.value = suggestion;
                             suggestionsDiv.style.display = 'none';
+
+                            if (form) {
+                                form.submit(); // Submit the form if it exists
+                            } else {
+                                performSearch(suggestion); // Perform search if no form exists
+                            }
                         });
                         suggestionsDiv.appendChild(div);
                     });
@@ -60,7 +67,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.addEventListener('click', function (event) {
         if (!suggestionsDiv.contains(event.target) && event.target !== searchInput) {
-            suggestionsDiv.style.display = 'none';
+            suggestionsDiv.style.display = 'none'; // Hide suggestions if clicked outside
         }
     });
+
+    function performSearch(query) {
+        fetch(`/tracker?search=${encodeURIComponent(query)}`, {
+            method: 'POST'
+        })
+        .then(response => response.text())
+        .then(html => {
+            document.querySelector('main').innerHTML = html; // Update the page content with the new HTML
+        });
+    }
 });

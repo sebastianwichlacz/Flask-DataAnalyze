@@ -77,13 +77,13 @@ def tracker():
     db_file = "db/database.db"
     table_name = "covid_data"
 
-    if request.method == 'POST':
-        search_value = request.form.get('search').strip()
+    search_value = request.args.get('search') if request.method == 'GET' else request.form.get('search', '').strip()
+
+    if search_value:
         df = read_data_from_db(db_file, table_name)
         df.drop(["Lat", "Long"], axis=1, inplace=True)
         df_country = df.groupby("Country/Region").sum()
 
-        # Check if the search_value is in the index of df_country
         if search_value in df_country.index:
             search_result = search_value
         else:
