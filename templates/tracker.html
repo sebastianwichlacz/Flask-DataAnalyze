@@ -5,21 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tracker</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
-    <h1>Search</h1>
-    <form method="POST" action="/tracker">
-        <label for="search">Search:</label>
-        <input type="text" id="search" name="search" required>
-        <button type="submit">Submit</button>
-    </form>
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Search and Plot</h1>
 
-    <div id="suggestions" class="suggestions" style="display: none;"></div>
+    <!-- Search Field 1 -->
+    <div class="form-group">
+        <label for="search1">Search 1:</label>
+        <input type="text" id="search1" name="search1" class="form-control">
+        <!-- Suggestions for Search Field 1 -->
+        <div id="suggestions1" class="suggestions mt-2"></div>
+    </div>
 
-    <p>{{ search_result }}</p>
+    <!-- Search Field 2 -->
+    <div class="form-group">
+        <label for="search2">Search 2:</label>
+        <input type="text" id="search2" name="search2" class="form-control">
+        <!-- Suggestions for Search Field 2 -->
+        <div id="suggestions2" class="suggestions mt-2"></div>
+    </div>
 
-    <a href="{{ url_for('views.index') }}">Back to Home</a>
+    <!-- Display Plot -->
+    <h2 class="text-center mt-5">Generated Plot</h2>
+    <div class="text-center">
+        <img id="plot-image" src="" alt="Plot will be displayed here" class="img-fluid d-block mx-auto mt-3">
+    </div>
 
-    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+    <div class="text-center mt-4">
+        <a href="/" class="btn btn-dark">Back to Home</a>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

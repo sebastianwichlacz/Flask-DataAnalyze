@@ -26,20 +26,25 @@
 }
 
 .suggestions {
-    border: 1px solid #ddd;
-    border-top: none;
-    max-height: 150px;
-    overflow-y: auto;
+    display: none;
     position: absolute;
-    z-index: 1000;
-    background: white;
-    width: 100%;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    border: 1px solid #ddd;
+    background-color: white;
+    max-height: 200px;
+    overflow-y: auto;
 }
+
+.suggestions.show {
+    display: block;
+}
+
 .suggestion-item {
     padding: 10px;
     cursor: pointer;
 }
 .suggestion-item:hover {
     background-color: #f0f0f0;
+}
+#plot-image {
+    display: none;
 }

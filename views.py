@@ -1,11 +1,14 @@
+import os
 import sqlite3
 from flask import Blueprint, render_template, request, jsonify
 import matplotlib
+
 matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 import pandas as pd
 
 views = Blueprint('views', __name__)
+
 
 def get_categories_from_db():
     conn = sqlite3.connect('db/database.db')
@@ -17,6 +20,7 @@ def get_categories_from_db():
     # Convert list of tuples to a set of strings
     countries_set = sorted(set(country[0] for country in countries))
     return countries_set
+
 
 def read_data_from_db(db_file, table_name):
     conn = sqlite3.connect(db_file)
@@ -39,12 +43,11 @@ def save_plot_to_image(df_country, selected_countries):
     plt.grid(True)
 
     # Save plot as a PNG file
-    image_path = '../DataAnalyzeCovid-19/static/images/covid_cases_plot.png'
+    image_path = '../Flask-DataAnalyze/static/images/covid_cases_plot.png'
     plt.savefig(image_path)
     plt.close()
 
     return 'images/covid_cases_plot.png'
-
 
 
 @views.route('/', methods=['GET', 'POST'])
@@ -72,26 +75,26 @@ def index():
 
     return render_template("index.html", countries=countries)
 
+
 @views.route('/tracker', methods=['GET', 'POST'])
 def tracker():
     db_file = "db/database.db"
     table_name = "covid_data"
 
-    search_value = request.args.get('search') if request.method == 'GET' else request.form.get('search', '').strip()
+    search_value1 = request.args.get('search1', '').strip()
+    search_value2 = request.args.get('search2', '').strip()
 
-    if search_value:
+    plot_path = None
+
+    if search_value1 and search_value2:
         df = read_data_from_db(db_file, table_name)
         df.drop(["Lat", "Long"], axis=1, inplace=True)
         df_country = df.groupby("Country/Region").sum()
 
-        if search_value in df_country.index:
-            search_result = search_value
-        else:
-            search_result = "No matches found."
+        if search_value1 in df_country.index and search_value2 in df_country.index:
+            plot_path = save_plot_to_image(df_country, [search_value1, search_value2])
 
-        return render_template("tracker.html", search_result=search_result)
-
-    return render_template('tracker.html', search_result=None)
+    return render_template('tracker.html', plot=plot_path)
 
 
 @views.route('/suggestions', methods=['GET'])
@@ -103,7 +106,28 @@ def suggestions():
     df.drop(["Lat", "Long"], axis=1, inplace=True)
     countries = df['Country/Region'].unique()
 
-    # Filter countries based on search_term being a substring in the same sequence
+    # Filter countries based on search_term
     matches = [country for country in countries if search_term.lower() in country.lower()]
 
     return jsonify(matches)
+
+
+@views.route('/plot', methods=['GET'])
+def plot():
+    country1 = request.args.get('country1')
+    country2 = request.args.get('country2')
+
+    db_file = "db/database.db"
+    table_name = "covid_data"
+
+    # Read data from DB
+    df = read_data_from_db(db_file, table_name)
+    df.drop(["Lat", "Long"], axis=1, inplace=True)
+    df_country = df.groupby("Country/Region").sum()
+
+    plot_path = save_plot_to_image(df_country, [country1, country2])
+
+    if plot_path:
+        return jsonify({'plot': plot_path})
+    else:
+        return jsonify({'error': 'Plot could not be generated'}), 400

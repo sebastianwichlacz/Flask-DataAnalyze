@@ -1,83 +1,74 @@
-// scripts.js
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput1 = document.getElementById('search1');
+    const searchInput2 = document.getElementById('search2');
+    const plotImage = document.getElementById('plot-image'); // Ensure you have an image element with this ID
 
-document.addEventListener('DOMContentLoaded', () => {
-    const buttons = document.querySelectorAll('.country-btn');
-    const selectedCountriesInput = document.getElementById('selected_countries');
-    const maxSelection = 2; // Limit the number of selected countries
-
-    buttons.forEach(button => {
-        button.addEventListener('click', () => {
-            // Toggle the 'selected' class
-            button.classList.toggle('selected');
-
-            // Update the hidden input field with selected countries
-            const selectedButtons = document.querySelectorAll('.country-btn.selected');
-            if (selectedButtons.length > maxSelection) {
-                button.classList.remove('selected');
-                alert(`You can select up to ${maxSelection} countries.`);
-                return;
-            }
-
-            const selectedCountries = Array.from(selectedButtons).map(btn => btn.dataset.country);
-            selectedCountriesInput.value = selectedCountries.join(',');
-        });
+    searchInput1.addEventListener('input', function() {
+        fetchSuggestions(searchInput1.value, 'search1');
     });
-});
 
-document.addEventListener('DOMContentLoaded', function () {
-    const searchInput = document.getElementById('search');
-    const suggestionsDiv = document.getElementById('suggestions');
-    const form = document.querySelector('form');
+    searchInput2.addEventListener('input', function() {
+        fetchSuggestions(searchInput2.value, 'search2');
+    });
 
-    searchInput.addEventListener('input', function () {
-        const searchTerm = searchInput.value;
-
-        if (searchTerm.length === 0) {
-            suggestionsDiv.style.display = 'none';
+    function fetchSuggestions(term, searchInputId) {
+        if (term.length < 1) {
+            hideSuggestions(searchInputId);
             return;
         }
 
-        fetch(`/suggestions?term=${searchTerm}`)
+        fetch(`/suggestions?term=${encodeURIComponent(term)}`)
             .then(response => response.json())
             .then(data => {
+                const suggestionsDiv = document.getElementById(`suggestions${searchInputId === 'search1' ? 1 : 2}`);
                 suggestionsDiv.innerHTML = '';
                 if (data.length > 0) {
                     suggestionsDiv.style.display = 'block';
-                    data.forEach(suggestion => {
+                    data.forEach(country => {
                         const div = document.createElement('div');
-                        div.textContent = suggestion;
+                        div.textContent = country;
                         div.classList.add('suggestion-item');
-                        div.addEventListener('click', function () {
-                            searchInput.value = suggestion;
-                            suggestionsDiv.style.display = 'none';
-
-                            if (form) {
-                                form.submit(); // Submit the form if it exists
-                            } else {
-                                performSearch(suggestion); // Perform search if no form exists
-                            }
-                        });
+                        div.addEventListener('click', () => handleSuggestionClick(country, searchInputId));
                         suggestionsDiv.appendChild(div);
                     });
                 } else {
                     suggestionsDiv.style.display = 'none';
                 }
-            });
-    });
+            })
+            .catch(error => console.error('Error fetching suggestions:', error));
+    }
 
-    document.addEventListener('click', function (event) {
-        if (!suggestionsDiv.contains(event.target) && event.target !== searchInput) {
-            suggestionsDiv.style.display = 'none'; // Hide suggestions if clicked outside
+    function handleSuggestionClick(country, searchInputId) {
+        if (searchInputId === 'search1') {
+            searchInput1.value = country;
+        } else if (searchInputId === 'search2') {
+            searchInput2.value = country;
         }
-    });
+        hideSuggestions('search1');
+        hideSuggestions('search2');
+        generatePlotIfBothSelected();
+    }
 
-    function performSearch(query) {
-        fetch(`/tracker?search=${encodeURIComponent(query)}`, {
-            method: 'POST'
-        })
-        .then(response => response.text())
-        .then(html => {
-            document.querySelector('main').innerHTML = html; // Update the page content with the new HTML
-        });
+    function hideSuggestions(searchInputId) {
+        const suggestionsDiv = document.getElementById(`suggestions${searchInputId === 'search1' ? 1 : 2}`);
+        suggestionsDiv.innerHTML = '';
+        suggestionsDiv.style.display = 'none';
+    }
+
+    function generatePlotIfBothSelected() {
+        const country1 = searchInput1.value.trim();
+        const country2 = searchInput2.value.trim();
+        if (country1 && country2) {
+            fetch(`/plot?country1=${encodeURIComponent(country1)}&country2=${encodeURIComponent(country2)}`)
+                .then(response => response.json())
+                .then(data => {
+                     if (data.plot) {
+                    const plotImage = document.getElementById('plot-image');
+                    plotImage.src = `/static/${data.plot}`;
+                    plotImage.style.display = 'block';
+                    }
+                })
+                .catch(error => console.error('Error fetching plot:', error));
+        }
     }
 });
